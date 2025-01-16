@@ -1,0 +1,10 @@
+build/
+*.vcxproj*
+*.sln
+*.exe
+*.o
+*.obj
+include/*
+external/*
+.vscode/*
+.vs/*
