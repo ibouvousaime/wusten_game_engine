@@ -47,23 +47,29 @@ glm::mat4 Model::getGlobalViewModel() {
 Model generateCube(std::string name, std::string shaderName, glm::vec3 dimensions) {
 	auto halfDimension = dimensions * 0.5f;
 	std::vector<float> vertices = {
-		-halfDimension.x, -halfDimension.y, halfDimension.z, //0
-		halfDimension.x, -halfDimension.y, halfDimension.z,  //1
-		halfDimension.x, -halfDimension.y, -halfDimension.z, //2
-		-halfDimension.x, -halfDimension.y, -halfDimension.z,  //3
+		 0.5f * dimensions.x,  0.5f * dimensions.y,  0.5f * dimensions.z,
+		-0.5f * dimensions.x,  0.5f * dimensions.y,  0.5f * dimensions.z,
+		-0.5f * dimensions.x, -0.5f * dimensions.y,  0.5f * dimensions.z,
+		 0.5f * dimensions.x, -0.5f * dimensions.y,  0.5f * dimensions.z,
 
-		-halfDimension.x, halfDimension.y, halfDimension.z, //4
-		halfDimension.x, halfDimension.y, halfDimension.z, //5
-		halfDimension.x, halfDimension.y, -halfDimension.z,  //6
-		-halfDimension.x, halfDimension.y, -halfDimension.z //7
+		  0.5f * dimensions.x,  0.5f * dimensions.y, -0.5f * dimensions.z,
+		 -0.5f * dimensions.x,  0.5f * dimensions.y, -0.5f * dimensions.z,
+		 -0.5f * dimensions.x, -0.5f * dimensions.y, -0.5f * dimensions.z,
+		  0.5f * dimensions.x, -0.5f * dimensions.y, -0.5f * dimensions.z,
 	};
 	std::vector<unsigned int> indices = {
-		0, 1, 2, 3, 2, 0,
-		4, 5, 6, 6, 7, 4,
-		1, 2, 6, 6, 5, 1,
-		2, 3, 7, 7, 6, 2,
-		3, 0, 4, 4, 7, 3,
-		0, 1, 5, 5, 4, 0
+		0, 1, 2,
+		2, 3, 0,
+		0, 3, 7,
+		7, 4, 0,
+		2, 6, 7,
+		7, 3, 2,
+		1, 5, 6,
+		6, 2, 1,
+		4, 7, 6,
+		6, 5, 4,
+		5, 1, 0,
+		0, 4, 5,
 	};
 
 	auto output = Model(name, shaderName, vertices, indices);
