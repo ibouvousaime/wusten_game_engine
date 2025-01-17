@@ -5,9 +5,8 @@ project(Engine)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(SOURCES
-    src/main.cpp
-)
+file(GLOB SOURCES "src/*.cpp")
+
 
 include_directories(
     include
@@ -27,3 +26,8 @@ target_link_libraries(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
+
+set(RESOURCE_DIR ${CMAKE_SOURCE_DIR}/resources)
+set(OUTPUT_DIR ${CMAKE_BINARY_DIR})
+
+file(COPY ${RESOURCE_DIR} DESTINATION ${OUTPUT_DIR})
