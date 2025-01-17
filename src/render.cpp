@@ -68,14 +68,13 @@ void renderModel(Model model, Camera camera) {
 	glUseProgram(model.shaderProgram);
 	glBindVertexArray(model.VAO);
 
-	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(FOV), WINDOW_HEIGHT / WINDOW_WIDTH, CAMERA_CLIP_NEAR, CAMERA_CLIP_FAR);
+	
 
 	int modelLoc = glGetUniformLocation(model.shaderProgram, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model.getGlobalViewModel()));
 
 	int projectionLoc = glGetUniformLocation(model.shaderProgram, "projection");
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(camera.projection));
 
 	int viewLoc = glGetUniformLocation(model.shaderProgram, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.view_matrix));
@@ -102,11 +101,11 @@ void renderScene(Scene scene, Camera camera) {
 	}
 }
 
-Scene* initTestScene() {
+Scene* initTestScene(int width, int height) {
 	auto scene = new Scene();
 	scene->name = "test room";
-	float roomWidth = 5.0f;
-	float roomHeight = 10.0f;
+	float roomWidth = 20.0f;
+	float roomHeight = 15.0f;
 
 	auto floor = generateCube("test", "basic", glm::vec3(roomWidth, 0.2f, roomWidth));
 	floor.setPosition(glm::vec3(0.0f, -.1f, 0.0f));
@@ -130,7 +129,7 @@ Scene* initTestScene() {
 	scene->models.push_back(wallRight);
 	scene->models.push_back(wallBack);
 
-	auto camera = Camera(glm::vec3(0.0f, 2.0f, -5.0f), glm::vec3(0.0f));
+	auto camera = Camera(glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.0f, -1.0f, -7.0f), width, height);
 	scene->cameras.push_back(camera);
 	prepareScene(scene, scene->cameras[0]);
 

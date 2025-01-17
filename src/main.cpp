@@ -16,13 +16,13 @@ void processInput(GLFWwindow* window, Camera* camera)
         glfwSetWindowShouldClose(window, true);
     const float cameraSpeed = 0.5f;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera->position += cameraSpeed * camera->direction;
+        camera->position += cameraSpeed * camera->orientation;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera->position -= cameraSpeed * camera->direction;
+        camera->position -= cameraSpeed * camera->orientation;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera->position -= glm::normalize(glm::cross(camera->direction, camera->up)) * cameraSpeed;
+        camera->position -= glm::normalize(glm::cross(camera->orientation, camera->up)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera->position += glm::normalize(glm::cross(camera->direction, camera->up)) * cameraSpeed;
+        camera->position += glm::normalize(glm::cross(camera->orientation, camera->up)) * cameraSpeed;
 }
 
 int main()
@@ -44,14 +44,19 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     } 
-    glViewport(0, 0, WINDOW_HEIGHT, WINDOW_WIDTH);
+    int height = 1024;
+    int width = 1024;
+    glViewport(0, 0, height, width);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glEnable(GL_CULL_FACE);
-    auto scene = initTestScene();
+    auto scene = initTestScene(width, height);
 
     while (!glfwWindowShouldClose(window))
     {
+        glfwGetWindowSize(window, &width, &height);
+        scene->cameras[0].height = height;
+        scene->cameras[0].width = width;
         scene->cameras[0].calculateMatrix();
         processInput(window, &scene->cameras[0]);
         glEnable(GL_DEPTH_TEST);

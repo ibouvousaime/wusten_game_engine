@@ -11,4 +11,4 @@ void prepareModel(Model* model, Camera camera);
 void renderModel(Model model, Camera camera);
 void prepareScene(Scene* scene, Camera* camera);
 void renderScene(Scene scene, Camera camera);
-Scene* initTestScene();
+Scene* initTestScene(int width, int height);
