@@ -122,12 +122,17 @@ Scene* initTestScene(int width, int height) {
 	auto ball = generateSphere("test", "basic", glm::vec3(0.0f, 3.0f, 0.0f), 1.0f, 30, 20);
 	ball.colour = glm::vec4(0.5f, 0.5f, 0.0f, 1.0f); //yellow 
 
+	auto monkey = importModel("asda", "basic", "suzanne.obj");
+	monkey.colour = glm::vec4(0.5f, 0.5f, 0.0f, 1.0f); //yellow 
+	monkey.setPosition(glm::vec3(3.0f, 2.0f, 0.0f));
+
 
 	scene->models.push_back(floor);
 	scene->models.push_back(wallLeft);
 	scene->models.push_back(wallRight);
 	scene->models.push_back(wallBack);
 	scene->models.push_back(ball);
+	scene->models.push_back(monkey);
 	auto camera = Camera(glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.0f, -1.0f, -7.0f), width, height);
 	scene->cameras.push_back(camera);
 	prepareScene(scene, scene->cameras[0]);

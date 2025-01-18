@@ -7,6 +7,20 @@
 #include <glm/gtc/constants.hpp>     
 #include <iostream>
 #include <glad/glad.h>
+#include "utils.hpp"
+#include "constants.hpp"
+#include <cassert>
+struct Vertex {
+	bool initialized = false;
+	glm::vec3 position;
+	glm::vec3 normal;
+	glm::vec2 texCoords;
+	Vertex() : position(0.0f), normal(0.0f), texCoords(0.0f) {};
+	Vertex(glm::vec3 position);
+	Vertex(glm::vec3 position, glm::vec3 normal);
+	Vertex(glm::vec3 position, glm::vec3 normal, glm::vec3 texCoords);
+
+};
 
 struct Model {
 private:
@@ -14,8 +28,8 @@ private:
 	glm::vec3 position;
 	glm::vec3 scale;
 	glm::vec3 rotation;
-	std::vector<float> vertex_positions;
-
+	//std::vector<float> vertex_positions;
+	std::vector<Vertex> vertices;
 public:
 	bool prepared = false;
 	unsigned int VBO;
@@ -25,7 +39,7 @@ public:
 	std::string shaderName;
 	std::vector<unsigned int> indices;
 	glm::vec4 colour = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	Model(std::string name, std::string shaderName, std::vector<float> vertex_positions, std::vector<unsigned int> indices);
+	Model(std::string name, std::string shaderName, std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 	~Model();
 	void setPosition(glm::vec3 position);
 	void setScale(glm::vec3 scale);
@@ -40,3 +54,4 @@ public:
 
 Model generateCube(std::string name, std::string shaderName, glm::vec3 dimensions);
 Model generateSphere(std::string name, std::string shaderName, glm::vec3 position, float radius, int stacks, int sectors);
+Model importModel(std::string name, std::string shaderName, std::string filename);
