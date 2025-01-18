@@ -4,6 +4,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/constants.hpp>     
+#include <iostream>
+#include <glad/glad.h>
+
 struct Model {
 private:
 	std::string name;
@@ -13,6 +17,7 @@ private:
 	std::vector<float> vertex_positions;
 
 public:
+	bool prepared = false;
 	unsigned int VBO;
 	unsigned int VAO;
 	unsigned int EBO;
@@ -21,6 +26,7 @@ public:
 	std::vector<unsigned int> indices;
 	glm::vec4 colour = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	Model(std::string name, std::string shaderName, std::vector<float> vertex_positions, std::vector<unsigned int> indices);
+	~Model();
 	void setPosition(glm::vec3 position);
 	void setScale(glm::vec3 scale);
 	void setRotation(glm::vec3 rotation);
@@ -29,6 +35,8 @@ public:
 	glm::vec3 getScale();
 	std::vector<float> getVertexPositions();
 	glm::mat4 getGlobalViewModel();
+	void unloadModel();
 };
 
 Model generateCube(std::string name, std::string shaderName, glm::vec3 dimensions);
+Model generateSphere(std::string name, std::string shaderName, glm::vec3 position, float radius, int stacks, int sectors);

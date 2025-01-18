@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
     glad
     ${CMAKE_SOURCE_DIR}/external/glfw3.lib
+    ${CMAKE_SOURCE_DIR}/external/freetyped.lib
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

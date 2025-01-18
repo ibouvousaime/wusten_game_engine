@@ -41,7 +41,6 @@ unsigned int loadShaders(std::string name) {
 }
 
 void prepareModel(Model* model, Camera camera) {
-
 	model->shaderProgram = loadShaders(model->shaderName);
 	glGenVertexArrays(1, &model->VAO);
 	glGenBuffers(1, &model->VBO);
@@ -57,18 +56,15 @@ void prepareModel(Model* model, Camera camera) {
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-
-
 	glBindVertexArray(0);
 
-
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void renderModel(Model model, Camera camera) {
+void renderModel(Model model, Camera camera) { //ran every frame
 	glUseProgram(model.shaderProgram);
 	glBindVertexArray(model.VAO);
-
-	
 
 	int modelLoc = glGetUniformLocation(model.shaderProgram, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model.getGlobalViewModel()));
@@ -83,7 +79,8 @@ void renderModel(Model model, Camera camera) {
     glUniform4fv(colourLoc, 1, glm::value_ptr(model.colour));
 
 	glDrawElements(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, 0);
-
+	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 void prepareScene(Scene* scene, Camera camera) {
@@ -122,13 +119,15 @@ Scene* initTestScene(int width, int height) {
 	auto wallBack = generateCube("test", "basic", glm::vec3(roomWidth, roomHeight, 0.2f));
 	wallBack.setPosition(glm::vec3(0.0f, roomHeight / 2, -roomWidth / 2));
 	wallBack.colour = glm::vec4(0.8f, 0.8f, 0.0f, 1.0f); //yellow 
+	auto ball = generateSphere("test", "basic", glm::vec3(0.0f, 3.0f, 0.0f), 1.0f, 30, 20);
+	ball.colour = glm::vec4(0.5f, 0.5f, 0.0f, 1.0f); //yellow 
 
 
 	scene->models.push_back(floor);
 	scene->models.push_back(wallLeft);
 	scene->models.push_back(wallRight);
 	scene->models.push_back(wallBack);
-
+	scene->models.push_back(ball);
 	auto camera = Camera(glm::vec3(0.0f, 5.0f, 5.0f), glm::vec3(0.0f, -1.0f, -7.0f), width, height);
 	scene->cameras.push_back(camera);
 	prepareScene(scene, scene->cameras[0]);
@@ -136,3 +135,71 @@ Scene* initTestScene(int width, int height) {
 	return scene;
 }
 
+
+void renderTextLine(std::string text, FontRenderingData* fontRenderingData, float x, float y, float scale, glm::vec3 color, int width, int height){
+	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
+
+	glUseProgram(fontRenderingData->shaderProgram);
+	auto projectionLoc = glGetUniformLocation(fontRenderingData->shaderProgram, "projection");
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+	glUniform3f(glGetUniformLocation(fontRenderingData->shaderProgram, "textColor"), color.x, color.y, color.z);
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(fontRenderingData->VAO);
+
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++)
+	{
+		Character ch = fontRenderingData->characters[*c];
+
+		float xpos = x + ch.bearing.x * scale;
+		float ypos = y - (ch.size.y - ch.bearing.y) * scale;
+
+		float w = ch.size.x * scale;
+		float h = ch.size.y * scale;
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos,     ypos,       0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+			{ xpos + w, ypos + h,   1.0f, 0.0f }
+		};
+		//glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, ch.textureID);
+		//glUniform1i(glGetUniformLocation(fontRenderingData->shaderProgram, "text"), 0);
+		glBindBuffer(GL_ARRAY_BUFFER, fontRenderingData->VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		x += (ch.advance >> 6) * scale; 
+	}
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glUseProgram(0);
+}
+
+void renderTextLines(std::vector<std::string> texts, FontRenderingData* fontRenderingData, float x, float y, float scale, glm::vec3 color, int width, int height, int fontSize) {
+	const auto gap = 5;
+	for (size_t i = 0; i < texts.size(); i++) {
+		renderTextLine(texts[i], fontRenderingData, x, y, scale, color, width, height);
+		y -= fontSize + gap;
+	}
+}
+
+FontRenderingData setupDebugTextRendering(FT_Library ft, int fontSize) {
+	FontRenderingData frd = loadFont(ft, std::string(FONT_LOCATION_PREFIX) + std::string("BitterPro-Regular.ttf"), fontSize);
+	FT_Done_FreeType(ft);
+	frd.shaderProgram = loadShaders("text");
+	prepareTextRendering(&frd);
+	return frd;
+}
+
+void renderDebugText(FontRenderingData* frd, int width, int height, int fontSize, RenderDebugData debugData) {
+	std::vector<std::string> texts = {
+		"FPS: " + std::to_string(debugData.fpsCounter),
+		"Second sentence"
+	};
+	renderTextLines(texts, frd, 0.0f, (float)height - fontSize, 1.0f, glm::vec3(0.5f, 0.0f, 0.0f), width, height, fontSize);
+}
